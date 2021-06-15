@@ -201,6 +201,63 @@ void drawCasa(double x, double y, double z, double scaleX, double scaleY, double
         glPopMatrix();
 
 
+
+
+    glPopMatrix();
+
+    //desenha janelas
+    glPushMatrix();
+        int tam2 = 35;
+        int posX = 0;
+        int posY = 100;
+
+        glTranslated(x, 0, z);
+        glScaled(1, 1, 1);
+        glRotated(angle, rotateX, rotateY, rotateZ);
+
+        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_janela);
+        glTranslated(posX, posY, 51);
+        glBegin(GL_QUADS);
+            glVertex3d(0, 0, 0);
+            glVertex3d(tam2, 0, 0);
+            glVertex3d(tam2, tam2, 0);
+            glVertex3d(0, tam2, 0);
+
+
+        glEnd();
+
+        glTranslated(-45, 0, 0);
+
+        glBegin(GL_QUADS);
+            glVertex3d(0, 0, 0);
+            glVertex3d(tam2, 0, 0);
+            glVertex3d(tam2, tam2, 0);
+            glVertex3d(0, tam2, 0);
+
+
+        glEnd();
+
+        glTranslated(0, 40, 0);
+        glBegin(GL_QUADS);
+            glVertex3d(0, 0, 0);
+            glVertex3d(tam2, 0, 0);
+            glVertex3d(tam2, tam2, 0);
+            glVertex3d(0, tam2, 0);
+
+
+        glEnd();
+
+        glTranslated(45, 0, 0);
+        glBegin(GL_QUADS);
+            glVertex3d(0, 0, 0);
+            glVertex3d(tam2, 0, 0);
+            glVertex3d(tam2, tam2, 0);
+            glVertex3d(0, tam2, 0);
+
+
+        glEnd();
+
+
     glPopMatrix();
 
 }
