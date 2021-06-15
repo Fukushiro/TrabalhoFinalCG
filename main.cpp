@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include <iostream>
 
+#include <array>
+
 #define BLOCO 20
 #define TAM_CENARIO 1000
 #define DIST_MOVIMENTO 10
@@ -14,10 +16,18 @@ int i;
 GLfloat obs_x=BLOCO, obs_z=BLOCO, obs_y = 25;
 GLfloat deslocamento_x=DIST_MOVIMENTO, deslocamento_z=0;
 GLfloat angle = 90, fAspect = 1, angulo_rotacao = 0;
+enum Direcao {
+    Right,
+    Left,
+    Top,
+    Down
+};
 //cores
 double corEstrada[] = {61, 69, 65};
 double corCasa1[] = {69, 68, 64};
 double corCasa2[] = {43, 43, 37};
+double corJanela[] = {255, 255, 255};
+double corPorta[] = {43, 43, 37};
 double corChao[] = {42, 133, 53};
 double corArvoreFolha[] = {0, 255, 0};
 double corArvoreTronco[] = {150, 75, 0};
@@ -30,27 +40,117 @@ GLfloat cor_material_casa1[] = {corCasa1[0]/ 255, corCasa1[1] / 255, corCasa1[2]
 GLfloat cor_material_casa2[] = {corCasa2[0] / 255, corCasa2[1] / 255, corCasa2[2] / 255};
 GLfloat cor_material_arvore_tronco[] = {corArvoreTronco[0] / 255, corArvoreTronco[1] / 255, corArvoreTronco[2] / 255};
 GLfloat cor_material_arvore_folha[] = {corArvoreFolha[0] / 255, corArvoreFolha[1] / 255, corArvoreFolha[2] / 255};
-
+GLfloat cor_material_janela[] = {corJanela[0]/255, corJanela[1]/255, corJanela[2]/255};
+GLfloat cor_material_porta[] = {corPorta[0]/255, corPorta[1]/255, corPorta[2]/255};
 
 int eixo_x=0, eixo_y=0, eixo_z=0;
 
-void squad(double x, double w, double y, double h, double z, double zW){
-    /*
-        possuiZ - true = possuira uma profundidade no z
-                  false = não possuira profundida no z, sera no x a profundidade
-    */
+void squad(int x, int y, int w, int h, double scaleX, double scaleY, const std::array<unsigned int, 3> valor) {
+    //glColor3f(valor.at(0), valor.at(1), valor.at(2));
     glPushMatrix();
-        glColor3ub(115, 44, 39);
-        glTranslated(x, y, z);
-        glBegin(GL_QUADS);
-
-            glVertex3d(0+w, 0+h, 0+zW);
-            glVertex3d(0, 0+h, 0);
-            glVertex3d(0, 0, 0);
-            glVertex3d(0+w, 0, 0+zW);
-        glEnd();
+    glColor3ub(valor.at(0), valor.at(1), valor.at(2));
+    glTranslated(x, y, 0);
+    glScaled(scaleX, scaleY, 1);
+    glBegin(GL_QUADS);
+    glVertex2i(0, 0);
+    glVertex2i(0 + w, 0);
+    glVertex2i(0 + w, 0 - h);
+    glVertex2i(0, 0 - h);
+    glEnd();
     glPopMatrix();
 }
+
+
+class Mascara {
+   public:
+    double x;
+    double y;
+    double w;
+    double h;
+    Mascara();
+    Mascara(double x, double y, double w, double h){
+        this->x = x;
+        this->y = y;
+        this->w = w;
+        this->h = h;
+    };
+    void start(double x, double y, double w, double h){
+        this->x = x;
+        this->y = y;
+        this->w = w;
+        this->h = h;
+    };
+    void draw(){
+        squad(this->x, this->y, this->w, this->h, 1, 1, {0, 255, 0});
+    };
+    void atualizarPos(double x, double y) {
+        this->x = x;
+        this->y = y;
+    };
+    int pointInside(double x, double y, Mascara m2) {
+        if ((x > m2.x) && (x < m2.x + m2.w)) {
+            if (((y > m2.y - m2.h) && (y < m2.y))) {
+                return true;
+            }
+        }
+        return false;
+    };
+
+    int col(Mascara m2, int direction, double speed){
+        /*
+                    0=direita
+                    1=esquerda
+                    2=cima
+                    3=baixo
+                */
+
+        if (direction == Direcao::Right) {
+            if (this->pointInside(this->x + this->w + speed, this->y, m2) ||
+                this->pointInside(this->x + this->w + speed, this->y - this->h, m2) ||
+                this->pointInside(this->x + this->w + speed, this->y - (this->h / 2), m2)) {
+                return true;
+            }
+        } else if (direction == Direcao::Left) {
+            if (this->pointInside(this->x - speed, this->y, m2) ||
+                this->pointInside(this->x - speed, this->y - this->h, m2) ||
+                this->pointInside(this->x - speed, this->y - (this->h / 2), m2)) {
+                return true;
+            }
+        } else if (direction == Direcao::Top) {
+            if (this->pointInside(this->x, this->y + speed, m2) ||
+                this->pointInside(this->x + this->w, this->y + speed, m2) ||
+                this->pointInside(this->x + (this->w / 2), this->y + speed, m2)) {
+                return true;
+            }
+        } else if (direction == Direcao::Down) {
+            if (this->pointInside(this->x, this->y - this->w - speed, m2) ||
+                this->pointInside(this->x + this->w, this->y - this->w - speed, m2) ||
+                this->pointInside(this->x + (this->w / 2), this->y - this->w - speed, m2)) {
+                return true;
+            }
+        } else if (direction == -1) {
+            if (this->pointInside(this->x, this->y, m2) ||
+                this->pointInside(this->x + this->w, this->y, m2) ||
+                this->pointInside(this->x, this->y - this->h, m2) ||
+                this->pointInside(this->x + this->w, this->y - this->h, m2) ||
+                this->pointInside(this->x + (this->w / 2), this->y, m2) ||
+                this->pointInside(this->x, this->y - (this->h / 2), m2) ||
+                this->pointInside(this->x + this->w, this->y - (this->h / 2), m2) ||
+                this->pointInside(this->x + (this->w / 2), this->y - this->h, m2)) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
+
+};
+
+
+
+
+
 void drawTree(double x, double y, double z){
     glPushMatrix();
 
@@ -82,12 +182,13 @@ void drawCasa(double x, double y, double z, double scaleX, double scaleY, double
             glutSolidCube(10);
         glPopMatrix();
 
+        //desenha porta
         glPushMatrix();
             int tam = 4;
             int alt = 5*20;
             int pos = -50;
             double dist = 5.1;
-            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_casa2);
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_porta);
             glTranslated(0, pos, 0);
             glBegin(GL_QUADS);
                 glVertex3d(0, 0, dist);
