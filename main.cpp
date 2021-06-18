@@ -12,7 +12,7 @@
 #define BLOCO 20
 #define TAM_CENARIO 1000
 #define DIST_MOVIMENTO 10
-int i;
+int i,j;
 GLfloat obs_x=BLOCO, obs_z=BLOCO, obs_y = 25;
 GLfloat deslocamento_x=DIST_MOVIMENTO, deslocamento_z=0;
 GLfloat angle = 90, fAspect = 1, angulo_rotacao = 0;
@@ -45,107 +45,10 @@ GLfloat cor_material_porta[] = {corPorta[0]/255, corPorta[1]/255, corPorta[2]/25
 
 int eixo_x=0, eixo_y=0, eixo_z=0;
 
-void squad(int x, int y, int w, int h, double scaleX, double scaleY, const std::array<unsigned int, 3> valor) {
-    //glColor3f(valor.at(0), valor.at(1), valor.at(2));
-    glPushMatrix();
-    glColor3ub(valor.at(0), valor.at(1), valor.at(2));
-    glTranslated(x, y, 0);
-    glScaled(scaleX, scaleY, 1);
-    glBegin(GL_QUADS);
-    glVertex2i(0, 0);
-    glVertex2i(0 + w, 0);
-    glVertex2i(0 + w, 0 - h);
-    glVertex2i(0, 0 - h);
-    glEnd();
-    glPopMatrix();
-}
 
 
-class Mascara {
-   public:
-    double x;
-    double y;
-    double w;
-    double h;
-    Mascara();
-    Mascara(double x, double y, double w, double h){
-        this->x = x;
-        this->y = y;
-        this->w = w;
-        this->h = h;
-    };
-    void start(double x, double y, double w, double h){
-        this->x = x;
-        this->y = y;
-        this->w = w;
-        this->h = h;
-    };
-    void draw(){
-        squad(this->x, this->y, this->w, this->h, 1, 1, {0, 255, 0});
-    };
-    void atualizarPos(double x, double y) {
-        this->x = x;
-        this->y = y;
-    };
-    int pointInside(double x, double y, Mascara m2) {
-        if ((x > m2.x) && (x < m2.x + m2.w)) {
-            if (((y > m2.y - m2.h) && (y < m2.y))) {
-                return true;
-            }
-        }
-        return false;
-    };
-
-    int col(Mascara m2, int direction, double speed){
-        /*
-                    0=direita
-                    1=esquerda
-                    2=cima
-                    3=baixo
-                */
-
-        if (direction == Direcao::Right) {
-            if (this->pointInside(this->x + this->w + speed, this->y, m2) ||
-                this->pointInside(this->x + this->w + speed, this->y - this->h, m2) ||
-                this->pointInside(this->x + this->w + speed, this->y - (this->h / 2), m2)) {
-                return true;
-            }
-        } else if (direction == Direcao::Left) {
-            if (this->pointInside(this->x - speed, this->y, m2) ||
-                this->pointInside(this->x - speed, this->y - this->h, m2) ||
-                this->pointInside(this->x - speed, this->y - (this->h / 2), m2)) {
-                return true;
-            }
-        } else if (direction == Direcao::Top) {
-            if (this->pointInside(this->x, this->y + speed, m2) ||
-                this->pointInside(this->x + this->w, this->y + speed, m2) ||
-                this->pointInside(this->x + (this->w / 2), this->y + speed, m2)) {
-                return true;
-            }
-        } else if (direction == Direcao::Down) {
-            if (this->pointInside(this->x, this->y - this->w - speed, m2) ||
-                this->pointInside(this->x + this->w, this->y - this->w - speed, m2) ||
-                this->pointInside(this->x + (this->w / 2), this->y - this->w - speed, m2)) {
-                return true;
-            }
-        } else if (direction == -1) {
-            if (this->pointInside(this->x, this->y, m2) ||
-                this->pointInside(this->x + this->w, this->y, m2) ||
-                this->pointInside(this->x, this->y - this->h, m2) ||
-                this->pointInside(this->x + this->w, this->y - this->h, m2) ||
-                this->pointInside(this->x + (this->w / 2), this->y, m2) ||
-                this->pointInside(this->x, this->y - (this->h / 2), m2) ||
-                this->pointInside(this->x + this->w, this->y - (this->h / 2), m2) ||
-                this->pointInside(this->x + (this->w / 2), this->y - this->h, m2)) {
-                return true;
-            }
-        }
-
-        return false;
-    };
 
 
-};
 
 
 
@@ -381,7 +284,34 @@ void desenha(void)
     for(i = 0; i < 7; i++){
         drawCasa(120, 10, 220 + (120*i), 10, 50 + (10*i), 10, -90, 0, 1, 0);
     }
-     drawTree(250, 0, 250);
+    //desenha arvores
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 6; j++){
+
+            drawTree(250+(110*i), 0, 250 + (110 * j));
+        }
+    }
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 6; j++){
+
+            drawTree(250+(110*i), 0, -250 - (110 * j));
+        }
+    }
+
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 6; j++){
+
+            drawTree(-250-(110*i), 0, 250 + (110 * j));
+        }
+    }
+
+    for(i = 0; i < 6; i++){
+        for(j = 0; j < 6; j++){
+
+            drawTree(-250-(110*i), 0, -250 - (110 * j));
+        }
+    }
+
     glLineWidth(5.0);
     glColor3f(1.0,1.0,0.0);
     glBegin(GL_LINES);
