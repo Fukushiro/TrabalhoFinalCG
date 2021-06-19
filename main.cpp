@@ -6,6 +6,7 @@
 #include <math.h>
 #include <stdio.h>
 #include <iostream>
+#include <time.h>
 
 #include <array>
 
@@ -25,7 +26,8 @@ enum Direcao {
 //cores
 double corEstrada[] = {61, 69, 65};
 double corCasa1[] = {69, 68, 64};
-double corCasa2[] = {43, 43, 37};
+double corCasa2[] = {191, 146, 23};
+double corCasa3[] = {29, 145, 124};
 double corJanela[] = {255, 255, 255};
 double corPorta[] = {43, 43, 37};
 double corChao[] = {42, 133, 53};
@@ -38,6 +40,7 @@ GLfloat cor_material_parede[] = {1, 0, 0};
 GLfloat cor_material_estrada[] = {corEstrada[0]/255, corEstrada[1]/255, corEstrada[2]/255};
 GLfloat cor_material_casa1[] = {corCasa1[0]/ 255, corCasa1[1] / 255, corCasa1[2] / 255};
 GLfloat cor_material_casa2[] = {corCasa2[0] / 255, corCasa2[1] / 255, corCasa2[2] / 255};
+GLfloat cor_material_casa3[] = {corCasa3[0] / 255, corCasa3[1] / 255, corCasa3[2] / 255};
 GLfloat cor_material_arvore_tronco[] = {corArvoreTronco[0] / 255, corArvoreTronco[1] / 255, corArvoreTronco[2] / 255};
 GLfloat cor_material_arvore_folha[] = {corArvoreFolha[0] / 255, corArvoreFolha[1] / 255, corArvoreFolha[2] / 255};
 GLfloat cor_material_janela[] = {corJanela[0]/255, corJanela[1]/255, corJanela[2]/255};
@@ -45,10 +48,11 @@ GLfloat cor_material_porta[] = {corPorta[0]/255, corPorta[1]/255, corPorta[2]/25
 
 int eixo_x=0, eixo_y=0, eixo_z=0;
 
+const int qtd_casa = 100;
 
 
-
-
+int cores_casas[qtd_casa];
+int tamanho_casas[qtd_casa];
 
 
 
@@ -73,15 +77,22 @@ void drawTree(double x, double y, double z){
 
     glPopMatrix();
 }
-void drawCasa(double x, double y, double z, double scaleX, double scaleY, double scaleZ, double angle, double rotateX, double rotateY, double rotateZ){
+void drawCasa(double x, double y, double z, double scaleX, double scaleY, double scaleZ, double angle, double rotateX, double rotateY, double rotateZ, int cor, int tamanho){
+    tamanho = tamanho_casas[tamanho];
     glPushMatrix();
-        glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_casa1);
+        if(cores_casas[cor] == 0){
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_casa1);
+        }else if(cores_casas[cor] == 1){
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_casa2);
+        }else if(cores_casas[cor] == 2){
+            glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_casa3);
+        }
         glTranslated(x, 0, z);
         glScaled(scaleX, 1, scaleZ);
         glRotated(angle, rotateX, rotateY, rotateZ);
         glPushMatrix();
             glTranslated(0, y, 0);
-            glScaled(1, scaleY, 1);
+            glScaled(1, tamanho, 1);
             glutSolidCube(10);
         glPopMatrix();
 
@@ -169,7 +180,7 @@ void drawStreet(double x, double y, double z, double scaleX, double scaleZ){
     glPushMatrix();
         glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_estrada);
         glTranslated(x, y, z);
-        glScaled(scaleX, 0, scaleZ);
+        glScaled(scaleX, 1, scaleZ);
 
         glBegin(GL_QUADS);
             glVertex3d(0, 0, 0);
@@ -245,44 +256,53 @@ void desenha(void)
     glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, cor_material_parede);
 
     //desenha a rua
-    int larguraRua = 6;
-    drawStreet(-TAM_CENARIO, -49, 0, (TAM_CENARIO* 2)/10, larguraRua);
-    drawStreet(0, -49, -TAM_CENARIO, larguraRua, ((TAM_CENARIO) / 10) ) ;
-    drawStreet(0, -49, larguraRua*10 ,larguraRua, ((TAM_CENARIO) / 10));
-
+    int larguraRua = 8;
+    drawStreet(-TAM_CENARIO, -49, -25, (TAM_CENARIO* 2)/10, larguraRua);
+    drawStreet(-25, -49, -TAM_CENARIO, larguraRua, ((TAM_CENARIO) / 10)+25 ) ;
+    drawStreet(-25, -49, larguraRua*10 ,larguraRua, ((TAM_CENARIO) / 10));
+    int vAt = 0;
+    int tamanhoAt = 0;
     //desenha a casa
     //1
     for(i = 0; i < 8; i++){
-        drawCasa(-100 - (120*i), 10, -100, 10, 50+(40*i), 10, 0, 0, 0, 0);
+        drawCasa(-100 - (120*i), 10, -100, 10, 50+(40*i), 10, 0, 0, 0, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //2
     for(i = 0;i < 8; i++){
-        drawCasa(-100 - (120*i), 10, 120, 10, 50 + (10*i), 10, 180, 0, 1, 0);
+        drawCasa(-100 - (120*i), 10, 120, 10, 50 + (10*i), 10, 180, 0, 1, 0, vAt,tamanhoAt++);
+        vAt++;
     }
 
     //3
     for(i = 0; i < 7; i++){
-        drawCasa(-100, 10, -220 - (120*i), 10, 50 + (10*i), 10, 90, 0, 1, 0);
+        drawCasa(-100, 10, -220 - (120*i), 10, 50 + (10*i), 10, 90, 0, 1, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //4
     for(i = 0; i < 7; i++){
-        drawCasa(120 + (120*i), 10, -100,10, 50+(40*i), 10, 0, 0, 0, 0);
+        drawCasa(120 + (120*i), 10, -100,10, 50+(40*i), 10, 0, 0, 0, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //5
     for(i = 0;i < 7; i++){
-        drawCasa(120 + (120*i), 10, 120, 10, 50 + (10*i), 10, 180, 0, 1, 0);
+        drawCasa(120 + (120*i), 10, 120, 10, 50 + (10*i), 10, 180, 0, 1, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //6
     for(i = 0; i < 7; i++){
-        drawCasa(120, 10, -220 - (120*i), 10, 50 + (10*i), 10, -90, 0, 1, 0);
+        drawCasa(120, 10, -220 - (120*i), 10, 50 + (10*i), 10, -90, 0, 1, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //7
     for(i = 0; i < 7; i++){
-        drawCasa(-100, 10, 220 + (120*i), 10, 50 + (10*i), 10, 90, 0, 1, 0);
+        drawCasa(-100, 10, 220 + (120*i), 10, 50 + (10*i), 10, 90, 0, 1, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //8
     for(i = 0; i < 7; i++){
-        drawCasa(120, 10, 220 + (120*i), 10, 50 + (10*i), 10, -90, 0, 1, 0);
+        drawCasa(120, 10, 220 + (120*i), 10, 50 + (10*i), 10, -90, 0, 1, 0, vAt, tamanhoAt++);
+        vAt++;
     }
     //desenha arvores
     for(i = 0; i < 6; i++){
@@ -408,6 +428,16 @@ void Keyboard(unsigned char key, int x, int y)
 
 void init(void)
 {
+    srand(time(NULL));
+    for(i = 0; i < qtd_casa; i++){
+        int val = rand() % 3;
+        cores_casas[i] = val;
+    }
+
+    for(i = 0; i < qtd_casa; i++){
+        int val = 35 + rand()%100;
+        tamanho_casas[i] = val;
+    }
 
     glClearColor(0.0, 0.0, 0.0, 0.0);
 
